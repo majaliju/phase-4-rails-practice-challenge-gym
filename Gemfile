@@ -36,3 +36,12 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+# HACK(bouk): Overwrite Bundler's platform matcher to ignore universal CPU
+# The protobuf and gRPC 'universal' macOS gems break on M1
+module Bundler::MatchPlatform
+  def match_platform(p)
+    return false if ::Gem::Platform === platform && platform.cpu == "universal"
+    Bundler::MatchPlatform.platforms_match?(platform, p)
+  end
+end
